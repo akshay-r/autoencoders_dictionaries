@@ -1,13 +1,26 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% This function computes the gradient of our proposed                   %%
+%% autoencoder loss function.                                            %%
+%% Inputs:                                                               %%
+%%        W - point at which we want to compute the gradient             %%
+%%        X,Y - training data, sparse coeffs and signals                 %%
+%%        k - number of non-zero coeffs                                  %%
+%%        delta - parameter as defined in the paper                      %%
+%%        epsilon_i - bias for ReLU hidden layer                         %%
+%% Outputs:                                                              %%
+%%        grad_mat - gradient of loss function                           %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function grad_mat = grad(W, X, Y, k, delta, epsilon_i)
     h = size(X,1);
     n = size(Y,1);
     N = size(Y,2);
-    
+
     C = (1 - delta)^2;  % remark, after theorm 3.2
-    q_i = k/h; % sparsity probability  
+    q_i = k/h; % sparsity probability
     lambda_1 = C*h*k + h*q_i*(1 - delta)^2;% 3.2 proposed gradient, lambda 1
     lambda_2 = -1; % 3.2 proposed gradient, lambda 1
-    
+
     grad_mat = zeros(h,n);
     W_T = W';
 
@@ -23,7 +36,7 @@ function grad_mat = grad(W, X, Y, k, delta, epsilon_i)
 
             activity_regularization_grad = lambda_2*( (norm(W_tilde*Y(:,j),2)^2) * W_T(:,supp(i)) + (norm(W_tilde, 'fro')^2) * (W_T(:,supp(i))'*Y(:,j)) *Y(:,j));
 
-            grad_mat(supp(i),:) = grad_mat(supp(i),:) + (squared_loss_grad + weight_regularization_grad + activity_regularization_grad)'; 
+            grad_mat(supp(i),:) = grad_mat(supp(i),:) + (squared_loss_grad + weight_regularization_grad + activity_regularization_grad)';
         end
     end
     grad_mat = (1/N)*grad_mat;

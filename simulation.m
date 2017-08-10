@@ -1,21 +1,20 @@
 n = 100; num_datapoints = 5000;
-% H = [256, 512, 1024];
-% H = [1024];
-H = [2048, 4096];
-P = [0.2, 0.3, 0.4, 0.5];
+H = [256, 512, 1024, 2048, 4096]; % Sparse code dimensions
+P = [0.2, 0.3, 0.4, 0.5]; % Sparsity is h^p
 Y_diff_init_norm = zeros(length(H), length(P));
 Y_diff_final_norm = zeros(length(H), length(P));
 
-W_reps = 3;
-A_reps = 3;
+W_reps = 3; % Number of different initializations
+A_reps = 3; % Number of different dictionaries
 
 for i=1:length(H)
     for j=1:length(P)
         h = H(i); p = P(j); k = ceil(h^p); m1 = -1*h^(-3/2);
-        
+
         sprintf('Hidden dimension: %d',h)
-        
+
         for u=1:A_reps
+            % Generate the ground truth and data and set some parameters
             [X, Y, X_test, Y_test, A_star, coherence, m2] = data_generation(n, h, k, num_datapoints, m1);
             delta = 0.80;
             eta = 0.9;
@@ -24,8 +23,9 @@ for i=1:length(H)
             max_iter = 100;
 
             for v=1:W_reps
-%                 init_delta = 2.0;
-%                 [W, W_T] = initialize_W(A_star, init_delta);
+                % Initialize W and start gradient descent
+                init_delta = 15.0;
+                [W, W_T] = initialize_W(A_star, init_delta);
                 [W, W_T] = initialize_W_random(A_star);
                 W0 = W;
 
@@ -50,7 +50,7 @@ for i=1:length(H)
                 for t=1:size(init_diff,2)
                     init_diff_norm(t) = norm(init_diff(:,t),2);
                 end
-                
+
                 save(char('result_'+string(h)+'_'+string(p)+'_'+'u'+string(u)+'_'+'v'+string(v)+'.mat'));
             end
         end
